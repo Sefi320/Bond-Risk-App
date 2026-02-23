@@ -1,33 +1,19 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    https://shiny.posit.co/
-#
+
+
 
 library(shiny)
+library(bslib)
 
-# Define UI for application that draws a histogram
-fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-            plotOutput("distPlot")
-        )
-    )
-)
+page_navbar(
+  title = "Risk Management",
+  theme = bs_theme(),
+  nav_panel(title = "Market Conditions", p("Orange Section of Mental Model")),
+  nav_panel(title = "Portfolio", p("Green Section of Mental Model including Risk metrics")),
+  nav_panel(title = "Scenario Analysis", p("Blue section of mental model.")),
+  nav_spacer(),
+  
+  navbar_options = navbar_options(
+    bg = "steelblue",
+    inverse = T
+  )
+  )
