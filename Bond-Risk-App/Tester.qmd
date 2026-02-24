@@ -9,6 +9,7 @@ editor: source
 ```{r}
 library(tidyquant)
 library(tidyverse)
+library(corrplot)
 
 
 
@@ -71,4 +72,24 @@ t1 <- cmt_clean %>%
 ```
 
 
+```{r}
+x <- cmt_clean %>% 
+  dplyr::select(date,symbol,change_bps) %>% 
+    tidyr::pivot_wider(
+                       names_from = symbol,
+                       values_from = change_bps) %>% 
+  dplyr::select(-date) %>% 
+  stats::cor()
+
+
+    plot_ly(x = colnames(x),
+            y = rownames(x),
+            z = x,
+            type = "heatmap")
+    
+    
+corrplot(x, type = "lower", tl.col = "black", tl.srt = 45, method = "shade")
+  
+  
+```
 

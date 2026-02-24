@@ -48,4 +48,16 @@ cmt_clean <- cmt_data %>%
   tidyr::drop_na()
 
 
+order <- c("DGS1MO", # 1-Month
+           "DGS3MO", # 3-Month
+           "DGS6MO", # 6-Month
+           "DGS1",   # 1-Year
+           "DGS2",   # 2-Year
+           "DGS5",   # 5-Year
+           "DGS7",   # 7-Year
+           "DGS10",  # 10-Year
+           "DGS20",  # 20-Year
+           "DGS30"   # 30-Year
+)
+
 
