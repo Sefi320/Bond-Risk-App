@@ -1,6 +1,3 @@
-
-
-
 library(tidyquant)
 library(tidyverse)
 
