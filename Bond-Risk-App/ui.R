@@ -8,6 +8,7 @@ default_date <- "2026-01-05"
 
 page_navbar(
   title = "Risk Management",
+  fillable = FALSE,
   theme = bs_theme(),
   nav_panel(title = "Market Conditions", p("Orange Section of Mental Model"),
             card(
@@ -20,7 +21,12 @@ page_navbar(
             card(
               card_header("Correlation Matrix"),
               plotOutput("cor_map")
-            )),
+            ),
+            card(
+              card_header("Zero Curve (from DiscountCurve)"),
+              plotly::plotlyOutput("zero_curve_plot"),
+              DT::DTOutput("zero_curve_table")
+              )),
   
   
   

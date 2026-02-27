@@ -149,6 +149,43 @@ function(input, output, session) {
         disable = list(columns = 0))
       )
   })
+  
+  # Zero rate
+  curve_tbl <- reactive({
+    df <- x()
+    build_curve_tbl(df$data, df$closest_date, grid_times = seq(0.25, 30, by = 0.25), m = 2)
+  })
+  
+  # Zero rate plot output
+  output$zero_curve_plot <- renderPlotly({
+    ct <- curve_tbl()
+    
+    plotly::plot_ly(
+      data = ct,
+      x = ~ maturity,
+      y = ~ zero_rate,
+      type = "scatter",
+      mode = "lines"
+    ) %>%
+      plotly::layout(
+        xaxis = list(title = "Maturity (years)"),
+        yaxis = list(title = "Zero Rate"),
+        title = paste0("Zero Curve (loglinear DF) — ", x()$closest_date)
+      )
+  })
+  
+  # Table output to see different maturities, DFs and Zero Rates
+  output$zero_curve_table <- DT::renderDataTable({
+    ct <- curve_tbl()
+    
+    DT::datatable(
+      ct %>% transmute(
+        maturity,
+        zero_rate_pct = round(zero_rate, 4),
+        discount_factor = round(discount_factor, 6)
+      )
+    )
+  })
 
 
 
