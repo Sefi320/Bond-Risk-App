@@ -109,8 +109,9 @@ function(input, output, session) {
   portfolio_data <- reactiveVal(
     tibble::tibble(
       Bond = character(),
-      Maturity = numeric(),
       Rate = numeric(),
+      Maturity = numeric(),
+      Quantity = numeric(),
       Price = numeric()
       )
   )
@@ -119,6 +120,7 @@ function(input, output, session) {
   observeEvent(input$add_bond, {
     new_row <- tibble(
       Bond = input$bond_selector,
+      Quantity = input$quantity_input,
       Maturity = input$maturity_input,
       Rate = input$rate_input,
       Price = input$price_input
