@@ -1,6 +1,7 @@
 library(tidyquant)
 library(tidyverse)
 library(RQuantLib)
+library(arrow)
 
 tickers <- c(
   "DGS1MO", # 1-Month
