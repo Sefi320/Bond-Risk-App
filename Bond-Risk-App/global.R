@@ -2,6 +2,8 @@ library(tidyquant)
 library(tidyverse)
 library(RQuantLib)
 library(arrow)
+library(Rcpp)
+Rcpp::sourceCpp("bondcalculator.cpp")
 
 tickers <- c(
   "DGS1MO", # 1-Month
@@ -19,7 +21,6 @@ tickers <- c(
 cmt_clean <- read_feather(
   "feather_data/cmt_clean.feather"
 )
-
 
 order <- c("DGS1MO", # 1-Month
            "DGS3MO", # 3-Month
@@ -74,8 +75,4 @@ build_curve_tbl <- function(df_day, eval_date, grid_times = seq(0.25, 30, by = 0
     discount_factor = as.numeric(curve$discounts),
     zero_rate = as.numeric(curve$zerorates)
   )
-  
 }
-
-
-

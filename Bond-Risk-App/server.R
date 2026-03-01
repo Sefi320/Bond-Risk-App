@@ -7,62 +7,60 @@ library(tibble)
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
-
+  
   x <- reactive({
     req(input$yield_date)
-
+    
     available_dates <- sort(unique(as.Date(cmt_clean$date))) # Finds available dates from df
     selected <- as.Date(input$yield_date) # User selected date
-
+    
     closest_date <- available_dates[
       which.min(abs(available_dates - selected)) # snaps to closest date available if there is no data for the selected day (i.e weekends)
     ]
-
+    
     y <- cmt_clean %>%
       filter(as.Date(date) == closest_date)
-
+    
     list(
       data = y,
       selected = selected,
       closest_date = closest_date
     )
-
+    
   })
-
-
+  
   observeEvent(input$yield_date, {
-
+    
     selected <- as.Date(input$yield_date)
     available_dates <- sort(unique(as.Date(cmt_clean$date)))
     closest_date <- available_dates[
       which.min(abs(available_dates - selected))
     ]
-
+    
     if (closest_date != selected) {
       updateDateInput(session = session,"yield_date", value = closest_date)
     }
   })
-
-
+  
   output$date_msg <- renderUI({
     result <- x()
-
+    
     if (result$selected != result$closest_date) {
       showNotification(
-      paste0("Selected Date Not Available."," Showing ",result$closest_date," instead."),
-      duration = 7,
-      type = "warning"
+        paste0("Selected Date Not Available."," Showing ",result$closest_date," instead."),
+        duration = 7,
+        type = "warning"
       )
     }
-
+    
   })
-
+  
   output$yield_curve <- renderPlotly({
-
+    
     df <- x()
     df$data$symbol <- factor(df$data$symbol, levels = order)
-
-
+    
+    
     plotly::plot_ly(
       data = df$data,
       x = ~maturity,
@@ -81,9 +79,8 @@ function(input, output, session) {
         ),
         yaxis = list(title = "Yield")
       )
-    })
-
-
+  })
+  
   cor <- cmt_clean %>%
     dplyr::select(date,symbol,change_bps) %>%
     tidyr::pivot_wider(
@@ -91,14 +88,14 @@ function(input, output, session) {
       values_from = change_bps) %>%
     dplyr::select(-date) %>%
     stats::cor()
-
+  
   output$cor_map <- renderPlot({
     corrplot::corrplot(cor,
                        type = "lower",
                        tl.col = "black",
                        tl.srt = 45,
                        method = "shade")
-
+    
   })
   
   # -----
@@ -112,19 +109,19 @@ function(input, output, session) {
       Rate = numeric(),
       Maturity = numeric(),
       Quantity = numeric(),
-      Price = numeric()
-      )
+      'Face Value' = numeric()
+    )
   )
   
   # adds a row
   observeEvent(input$add_bond, {
     new_row <- tibble(
       Bond = input$bond_selector,
-      Quantity = input$quantity_input,
-      Maturity = input$maturity_input,
       Rate = input$rate_input,
-      Price = input$price_input
-      )
+      Maturity = input$maturity_input,
+      Quantity = input$quantity_input,
+      'Face Value' = input$face_input
+    )
     portfolio_data(dplyr::bind_rows(portfolio_data(), new_row))
   })
   
@@ -149,7 +146,7 @@ function(input, output, session) {
       editable = list(
         target = 'cell',
         disable = list(columns = 0))
-      )
+    )
   })
   
   # Zero rate
@@ -188,7 +185,5 @@ function(input, output, session) {
       )
     )
   })
-
-
-
+  
 }
