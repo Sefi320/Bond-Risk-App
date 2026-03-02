@@ -102,7 +102,7 @@ function(input, output, session) {
   # Zero rate
   curve_tbl <- reactive({
     df <- x()
-    build_curve_tbl(df$data, df$closest_date, grid_times = seq(0.25, 30, by = 0.25), m = 2)
+    build_curve_tbl(df$data, df$closest_date, grid_times = seq(0.25, 30, by = 0.01), m = 2)
   })
   
   # Zero rate plot output

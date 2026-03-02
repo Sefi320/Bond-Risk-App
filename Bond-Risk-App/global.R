@@ -63,7 +63,7 @@ q <- function(df_day, sym){
 }
 
 # The building process of the zero rate curve requires a function called "DiscountCurve" and it requires some things I create here such as "params" and "tsQuotes"
-build_curve_tbl <- function(df_day, eval_date, grid_times = seq(0.25, 30, by = 0.25), m = 2) {
+build_curve_tbl <- function(df_day, eval_date, grid_times = seq(0.25, 30, by = 0.01), m = 2) {
   
   # Quotes for DiscountCurve
   tsQuotes <- list(
