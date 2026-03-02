@@ -98,56 +98,7 @@ function(input, output, session) {
     
   })
   
-  # -----
-  # green portfolio section
-  # -----
-  
-  
-  portfolio_data <- reactiveVal(
-    tibble::tibble(
-      Bond = character(),
-      Rate = numeric(),
-      Maturity = numeric(),
-      Quantity = numeric(),
-      'Face Value' = numeric()
-    )
-  )
-  
-  # adds a row
-  observeEvent(input$add_bond, {
-    new_row <- tibble(
-      Bond = input$bond_selector,
-      Rate = input$rate_input,
-      Maturity = input$maturity_input,
-      Quantity = input$quantity_input,
-      'Face Value' = input$face_input
-    )
-    portfolio_data(dplyr::bind_rows(portfolio_data(), new_row))
-  })
-  
-  # deletes a row
-  observeEvent(input$delete_bond, {
-    req(input$portfolio_table_rows_selected)
-    portfolio_data(portfolio_data()[-input$portfolio_table_rows_selected, ])
-  })
-  
-  # edits a row
-  observeEvent(input$portfolio_table_cell_edit, {
-    info <- input$portfolio_table_cell_edit
-    updated_data <- DT::editData(portfolio_data(), info, rownames = FALSE)
-    portfolio_data(updated_data)
-  })
-  
-  output$portfolio_table <- DT::renderDataTable({
-    DT::datatable(
-      portfolio_data(),
-      rownames = FALSE,
-      selection = "single",
-      editable = list(
-        target = 'cell',
-        disable = list(columns = 0))
-    )
-  })
+ 
   
   # Zero rate
   curve_tbl <- reactive({
