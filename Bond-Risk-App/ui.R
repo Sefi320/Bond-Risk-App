@@ -60,11 +60,11 @@ bslib::page_navbar(
                        
                        bslib::card(
                          card_header("Duration"),
-                         p("Duration Here")
+                         textOutput("port_duration")
                        ),
                        bslib::card(
                          card_header("Convexity"),
-                         p("convexity Here")
+                         textOutput("port_convex")
                        )))),
   
   bslib::nav_panel(title = "Scenario Analysis",

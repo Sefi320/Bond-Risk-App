@@ -241,44 +241,87 @@ function(input, output, session) {
     
     ct <- build_curve_tbl(val_curve_data, val_date)
     
-    total_value <- 0
     
+    total_value <- calculate_portfolio(d,ct,val_date)
     
-    for (bond in 1:nrow(d)) {
-      
-      
-      T2M <- (d$Date[bond] + years(d$Maturity[bond]) - val_date) / 365
-      
-      if (T2M <= 0) next # If bond already matured, then it skips it
-      
-      cfs <- tibble::tibble(
-        maturity = seq_back(T2M = T2M,step = 0.5)) %>% 
-        dplyr::arrange(maturity) %>% 
-        dplyr::mutate(
-          CF = dplyr::case_when(
-            maturity == 0 ~ 0,
-            dplyr::row_number() == dplyr::n() ~ d$Price[bond] + (d$Price[bond] * (d$Rate[bond] / 2 /100)),
-            TRUE ~ d$Price[bond] * d$Rate[bond] / 2/100)) %>%
-        dplyr::mutate(maturity = round(maturity,2)) %>% 
-        dplyr::left_join(.,ct, by = "maturity") %>% 
-        dplyr::mutate(
-          pv = discount_factor * CF)
-      
-      bond_value <- sum(cfs$pv, na.rm = TRUE) * (d$Quantity[bond])
-      
-      total_value <- total_value + bond_value
-      
-      
-    }    
-    
-    total_value 
+    list(price = total_value)
     
   })
   
   output$portfolio_value <- renderText({
-    val <- portfolio_value()
+    val <- portfolio_value()$price
+    
     paste0("$", formatC(val, format = "f", digits = 2, big.mark = ","))
     
+  })
+  
+  
+  port_duration <- reactive({
+    
+    c <- 0.0001
+    
+    d <- portfolio_data()
+    req(nrow(d)>0)
+    
+    val_date <- input$portfolio_valuation_date
+    req(!is.null(val_date))
+    
+    val_curve_data_up <- cmt_clean %>% 
+      filter(as.Date(date) == as.Date(val_date)) %>% 
+      dplyr::mutate(rate = rate + c)
+    
+    if (nrow(val_curve_data_up) == 0) {
+      available_dates <- sort(unique(as.Date(cmt_clean$date)))
+      closest <- available_dates[which.min(abs(available_dates - as.Date(val_date)))]
+      val_curve_data <- cmt_clean %>% filter(as.Date(date) == closest)
+      val_date <- closest
+    }
+    
+    ct_up <- build_curve_tbl(val_curve_data_up, val_date)
+    
+    
+    val_curve_data_dwn <- cmt_clean %>% 
+      filter(as.Date(date) == as.Date(val_date)) %>% 
+      dplyr::mutate(rate = rate - c)
+    
+    
+    if (nrow(val_curve_data_dwn) == 0) {
+      available_dates <- sort(unique(as.Date(cmt_clean$date)))
+      closest <- available_dates[which.min(abs(available_dates - as.Date(val_date)))]
+      val_curve_data <- cmt_clean %>% filter(as.Date(date) == closest)
+      val_date <- closest
+    }
+    
+    ct_dwn <- build_curve_tbl(val_curve_data_dwn, val_date)
+    
+    
+    value_up <- calculate_portfolio(d,ct_up,val_date)
+    value_dwn <- calculate_portfolio(d,ct_dwn,val_date)
+    
+
+     num_duration <-  (value_up - value_dwn) / (2 * c) / 10000
+     num_gamma <- 0.5 * ((value_up - 2 * portfolio_value()$price + value_dwn) / c^2) / 10000^2
+    
+     
+     list(delta = num_duration,
+          gamma = num_gamma)
+    
+    
+  })
+  
+  
+  output$port_duration <- renderText({
+    
+    dur <-  port_duration()$delta
+    
+    paste0(round(dur,4)," Yrs")
+    
+  })
+  
+  output$port_convex <- renderText({
+    gam <- port_duration()$gamma
+    
+    paste0(round(gam,4))
   })
   
 }

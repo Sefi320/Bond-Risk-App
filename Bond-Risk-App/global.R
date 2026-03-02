@@ -112,4 +112,43 @@ build_curve_tbl <- function(df_day, eval_date, grid_times = seq(0.25, 30, by = 0
     }
     
     return(c(round(x, 2), 0))  
-}
+  }
+  
+  ### Helper Function to calculate portfolio value for delta and gamma calcs
+  
+  calculate_portfolio <- function(bonds_df, zero_curve, valuation_date) {
+    
+    total_value <- 0
+    
+    for (bond in 1:nrow(bonds_df)) {
+      
+      # Skip if not yet issued
+      if (bonds_df$Date[bond] > valuation_date) next
+      
+      T2M <- as.numeric((bonds_df$Date[bond] + years(bonds_df$Maturity[bond]) - valuation_date) / 365)
+      
+      # Skip if matured
+      if (T2M <= 0) next
+      
+      cfs <- tibble::tibble(
+        maturity = seq_back(T2M = T2M, step = 0.5)
+      ) %>% 
+        dplyr::arrange(maturity) %>% 
+        dplyr::mutate(
+          CF = dplyr::case_when(
+            maturity == 0 ~ 0,
+            dplyr::row_number() == dplyr::n() ~ bonds_df$Price[bond] + (bonds_df$Price[bond] * bonds_df$Rate[bond] / 200),
+            TRUE ~ bonds_df$Price[bond] * bonds_df$Rate[bond] / 200
+          ),
+          maturity = round(maturity, 2)
+        ) %>%
+        dplyr::left_join(zero_curve, by = "maturity") %>% 
+        dplyr::mutate(pv = discount_factor * CF)
+      
+      bond_value <- sum(cfs$pv, na.rm = TRUE) * bonds_df$Quantity[bond]
+      total_value <- total_value + bond_value
+    }
+    
+    total_value
+    
+  }
