@@ -65,14 +65,31 @@ build_curve_tbl <- function(df_day, eval_date, grid_times = seq(0.25, 30, by = 0
     interpWhat = "discount",
     interpHow = "loglinear"
   )
-  
+
   # VERY Cool function to get the zero rates
   curve <- RQuantLib::DiscountCurve(params, tsQuotes, grid_times)
+  
+
   
   # Creating a table to show the maturities, DFs and Zero Rates
   tibble(
     maturity = grid_times,
     discount_factor = as.numeric(curve$discounts),
     zero_rate = as.numeric(curve$zerorates)
-  )
+  )}
+  
+  # Helper Function to calculate portfolio value
+  seq_back <- function(T2M, step) {
+    
+    T2M <- as.numeric(T2M)
+    
+    x <- seq(from = T2M, to = 0, by = -step)
+    
+    remainder <- T2M %% step
+    
+    if (remainder > 0) {
+      x <- c(x[x > remainder], remainder)
+    }
+    
+    return(c(round(x, 2), 0))  
 }

@@ -43,7 +43,131 @@ bslib::page_navbar(
                      bslib::card(
                        bslib::card_header("Current Portfolio"),
                        DT::DTOutput("portfolio_table")
-                     ))),
+                     )),
+                   bslib::layout_columns(
+                     bslib::card(
+                       card_header("Allocation"),
+                       card_body(plotlyOutput("port_pie"))
+                     ), 
+                     layout_columns(
+                       bslib::card(
+                         card_header("Portfolio Value"),
+                         textOutput("portfolio_value")),
+                       
+                       bslib::card(
+                         card_header("Duration"),
+                         p("Duration Here")
+                       ),
+                       bslib::card(
+                         card_header("Convexity"),
+                         p("convexity Here")
+                       )))),
   
-  bslib::nav_panel(title = "Scenario Analysis", p("Blue section of mental model."))
-)
+  bslib::nav_panel(title = "Scenario Analysis",
+                   
+                   bslib::layout_sidebar(
+                     
+                     sidebar = bslib::sidebar(
+                       title = "Scenario Settings",
+                       shiny::selectInput("scenario",label = "Scenario Type:",choices = c(
+                         "Parallel Shift" = "parallel",
+                         "Curve Steepening" = "steepening",
+                         "Curve Flattening" = "flattening",
+                         "Bear Flattening" = "bear_flat",
+                         "Bull Steepening" = "bull_steep"
+                       )),
+                       
+                       shiny::conditionalPanel(
+                         condition = "input.scenario == 'parallel'",
+                         shiny::numericInput("parallel_shift",
+                                             label = "Parallel Shift (bps):",
+                                             min = -300,
+                                             max = 300,
+                                             value = 100,
+                                             step = 5)),
+                       shiny::conditionalPanel(
+                         condition = "input.scenario == 'steepening'",
+                         shiny::numericInput(
+                           "short_end_shift",
+                           "Short End Shift (bps):",
+                           min = -300,
+                           max = 300,
+                           value = 0,
+                           step = 5
+                         ),
+                         shiny::numericInput(
+                           "long_end_shift",
+                           "Long End Shift (bps):",
+                           min = -300,
+                           max = 300,
+                           value = 50,
+                           step = 5
+                         )
+                       ),
+                       
+                       shiny::conditionalPanel(
+                         condition = "input.scenario == 'flattening'",
+                         shiny::numericInput(
+                           "short_end_shift",
+                           "Short End Shift (bps):",
+                           min = -300,
+                           max = 300,
+                           value = 0,
+                           step = 5
+                         ),
+                         shiny::numericInput(
+                           "long_end_shift",
+                           "Long End Shift (bps):",
+                           min = -300,
+                           max = 300,
+                           value = 50,
+                           step = 5
+                         )
+                       ),
+                       
+                       shiny::conditionalPanel(
+                         condition = "input.scenario == 'bear_flat'",
+                         shiny::numericInput(
+                           "bear_flat_short",
+                           "Short End Shift (bps):",
+                           min = 0,
+                           max = 300,
+                           value = 100,
+                           step = 5
+                         ),
+                         shiny::numericInput(
+                           "bear_flat_long",
+                           "Long End Shift (bps):",
+                           min = 0,
+                           max = 300,
+                           value = 50,
+                           step = 5
+                         )
+                       ),
+                       
+                       shiny::conditionalPanel(
+                         condition = "input.scenario == 'bull_steep'",
+                         shiny::numericInput(
+                           "bull_steep_short",
+                           "Short End Shift (bps):",
+                           min = -300,
+                           max = 0,
+                           value = -50,
+                           step = 5
+                         ),
+                         shiny::numericInput(
+                           "bull_steep_long",
+                           "Long End Shift (bps):",
+                           min = -300,
+                           max = 0,
+                           value = 0,
+                           step = 5
+                         )
+                       ),
+                       
+                       shiny::actionButton(
+                         "run_scenario",
+                         "Run Scenario",
+                         class = "btn-primary",
+                         icon = icon("play")
+                       )))))
