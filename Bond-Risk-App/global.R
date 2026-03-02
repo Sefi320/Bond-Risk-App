@@ -22,6 +22,26 @@ cmt_clean <- read_feather(
   "feather_data/cmt_clean.feather"
 )
 
+risk_result <- cmt_clean %>% 
+  dplyr::mutate(
+    duration = NA,
+    convexity = NA,
+    delta = NA,
+    gamma = NA
+  ) %>% 
+  dplyr::select(price, maturity, rate, change_bps, m, duration, convexity, delta, gamma) %>% 
+  as.matrix() %>% 
+  bond_risk() %>% 
+  as.data.frame()
+
+cmt_clean <- cmt_clean %>% 
+  dplyr::mutate(
+    duration = risk_result$duration,
+    convexity = risk_result$convexity,
+    delta = risk_result$delta,
+    gamma = risk_result$gamma
+  )
+
 order <- c("DGS1MO", # 1-Month
            "DGS3MO", # 3-Month
            "DGS6MO", # 6-Month

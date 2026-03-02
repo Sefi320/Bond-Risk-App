@@ -5,7 +5,7 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 double bond_price(double maturity = 2, double rate = 0.05, double coupon = 0.1, int m = 2, int face = 100) {
   double price = 0.0;
-  int periods = round(m * maturity);
+  double periods = m * maturity;
   for (int i = 1; i <= periods; ++i) {
     price += (coupon * face / m) / pow((1 + rate / m), i);
   }
@@ -15,7 +15,7 @@ double bond_price(double maturity = 2, double rate = 0.05, double coupon = 0.1, 
 // [[Rcpp::export]]
 double bond_duration(double maturity = 2, double rate = 0.05, double coupon = 0.1, int m = 2, int face = 100) {
   double bond_npv = 0.0;
-  int periods = round(m * maturity);
+  double periods = m * maturity;
   for (int i = 1; i <= periods; ++i) {
     bond_npv += i * (coupon * face / m) / pow(1 + rate / m, i);
   }
@@ -26,10 +26,33 @@ double bond_duration(double maturity = 2, double rate = 0.05, double coupon = 0.
 // [[Rcpp::export]]
 double bond_convexity(double maturity = 2, double rate = 0.05, double coupon = 0.1, int m = 2, int face = 100) {
   double bond_convex = 0.0;
-  int periods = round(m * maturity);
+  double periods = m * maturity;
   for (int i = 1; i <= periods; ++i) {
     bond_convex += (coupon * face / m) * (pow(i, 2) + i) / (pow(m, 2) * pow(1 + rate / m, i)); 
   }
   bond_convex += face * (pow(periods, 2) + periods) / (pow(m, 2) * pow(1 + rate / m, periods));
   return(bond_convex / (bond_price(maturity, rate, coupon, m, face) * pow(1 + rate / m, 2)));
+}
+
+// [[Rcpp::export]]
+NumericVector bond_risk(NumericMatrix x) {
+  for (int i = 0; i < x.nrow(); i++) {
+    double maturity = x(i, 1);
+    double rate = x(i, 2);
+    double coupon = rate;
+    int m = x(i, 4);
+    int face = x(i, 0);
+    double p = bond_price(maturity, rate, coupon, m, face);
+    double p_plus = bond_price(maturity, rate +0.0001, coupon, m, face);
+    double p_minus = bond_price(maturity, rate -0.0001, coupon, m, face);
+    double duration = bond_duration(maturity, rate, coupon, m, face);
+    double convexity = bond_convexity(maturity, rate, coupon, m, face);
+    double delta = (p_plus - p_minus) / (2 * 0.0001) / 10000;
+    double gamma = 0.5 * ((p_plus - 2 * p + p_minus) / pow(0.0001, 2)) / pow(10000, 2);
+    x(i, 5) = duration;
+    x(i, 6) = convexity;
+    x(i, 7) = delta;
+    x(i, 8) = gamma;
+  }
+  return x;
 }
