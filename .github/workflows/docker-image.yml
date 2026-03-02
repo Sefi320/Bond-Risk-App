@@ -29,6 +29,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: lboyd02/Bond-Risk-App:latest
+        tags: lboyd02/bond-risk-app:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
