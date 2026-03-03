@@ -336,4 +336,66 @@ function(input, output, session) {
   }) 
   
   
+  bond_dv01 <- reactive({
+    
+    c <- 0.0001
+    
+    d <- portfolio_data()
+    req(nrow(d)>0)
+    
+    val_date <- input$portfolio_valuation_date
+    req(!is.null(val_date))
+    
+    val_curve_data_up <- cmt_clean %>% 
+      filter(as.Date(date) == as.Date(val_date)) %>% 
+      dplyr::mutate(rate = rate + c)
+    
+    val_curve_data_dwn <- cmt_clean %>% 
+      filter(as.Date(date) == as.Date(val_date)) %>% 
+      dplyr::mutate(rate = rate - c)
+    
+    ct_up <- build_curve_tbl(val_curve_data_up, val_date)
+    ct_dwn <- build_curve_tbl(val_curve_data_dwn, val_date)
+    
+    dv01 <- tibble::tibble()
+    
+    for (bond in 1:nrow(d)) {
+      
+      value_up <- calculate_portfolio(d[bond],ct_up,val_date)
+      value_dwn <- calculate_portfolio(d[bond],ct_dwn,val_date)
+      
+      dv01_bond <- (value_up - value_dwn) / (2 * c) / 10000
+      
+      dv01 <- dplyr::bind_rows(
+        dv01,
+        tibble::tibble(
+          bond_id = bond,
+          DV01 = dv01_bond))
+      
+    }
+    
+    total_dv01 <- sum(abs(dv01_tbl$DV01))
+    
+    dv01_tbl %>%
+      dplyr::mutate(
+        DV01_pct = abs(DV01) / total_dv01)
+  })
+  
+  
+  output$port_pie <- renderPlotly({
+    
+    df <- bond_dv01()
+    req(nrow(df)>0)
+    
+    plotly::plot_ly(
+      data = df,
+      labels = ~bond_id,
+      values = ~DV01_pct,
+      type = "pie") %>% 
+      layout(
+        title = "DV01 Contribution to Portfolio",
+        showlegend = FALSE)
+    
+  })
+  
 }

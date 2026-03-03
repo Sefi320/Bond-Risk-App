@@ -151,5 +151,6 @@ build_curve_tbl <- function(df_day, eval_date, grid_times = seq(0.25, 30, by = 0
     }
     
     total_value
-    
   }
+  
+
