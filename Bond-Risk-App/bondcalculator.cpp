@@ -38,8 +38,8 @@ double bond_convexity(double maturity = 2, double rate = 0.05, double coupon = 0
 NumericVector bond_risk(NumericMatrix x) {
   for (int i = 0; i < x.nrow(); i++) {
     double maturity = x(i, 1);
-    double rate = x(i, 2);
-    double coupon = rate;
+    double coupon = x(i, 2);
+    double rate = x(i, 3);
     int m = x(i, 4);
     int face = x(i, 0);
     double p = bond_price(maturity, rate, coupon, m, face);
@@ -49,10 +49,10 @@ NumericVector bond_risk(NumericMatrix x) {
     double convexity = bond_convexity(maturity, rate, coupon, m, face);
     double delta = (p_plus - p_minus) / (2 * 0.0001) / 10000;
     double gamma = 0.5 * ((p_plus - 2 * p + p_minus) / pow(0.0001, 2)) / pow(10000, 2);
-    x(i, 5) = duration;
-    x(i, 6) = convexity;
-    x(i, 7) = delta;
-    x(i, 8) = gamma;
+    x(i, 6) = duration;
+    x(i, 7) = convexity;
+    x(i, 8) = delta;
+    x(i, 9) = gamma;
   }
   return x;
 }

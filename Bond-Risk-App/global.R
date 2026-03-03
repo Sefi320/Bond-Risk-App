@@ -24,17 +24,18 @@ cmt_clean <- read_feather(
 
 risk_result <- cmt_clean %>% 
   dplyr::mutate(
+    ytm = rate,
     duration = NA,
     convexity = NA,
     delta = NA,
     gamma = NA
   ) %>% 
-  dplyr::select(price, maturity, rate, change_bps, m, duration, convexity, delta, gamma) %>% 
+  dplyr::select(price, maturity, rate, ytm, m, change_bps, duration, convexity, delta, gamma) %>% 
   as.matrix() %>% 
   bond_risk() %>% 
   as.data.frame()
 
-cmt_clean <- cmt_clean %>% 
+cmt_clean2 <- cmt_clean %>% 
   dplyr::mutate(
     duration = risk_result$duration,
     convexity = risk_result$convexity,
