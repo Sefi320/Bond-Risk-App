@@ -209,15 +209,10 @@ function(input, output, session) {
     DT::datatable(
       portfolio_data(),
       rownames = FALSE,
-      selection = "multiple",
+      selection = "single",
       editable = list(
         target = 'cell',
-        disable = list(columns = 0)),
-      options = list(
-        searching = FALSE,
-        lengthchange = FALSE,
-        paging = FALSE,
-        info = FALSE)
+        disable = list(columns = 0))
     )
   })
   
@@ -228,44 +223,34 @@ function(input, output, session) {
   
   portfolio_value <- reactive({
     
-    tryCatch({
-      
-      d <- portfolio_data()
-      req(nrow(d)>0)
-      
-      val_date <- input$portfolio_valuation_date
-      req(!is.null(val_date))
-      
-      val_curve_data <- cmt_clean %>% 
-        filter(as.Date(date) == as.Date(val_date))
-      
-      if (nrow(val_curve_data) == 0) {
-        available_dates <- sort(unique(as.Date(cmt_clean$date)))
-        closest <- available_dates[which.min(abs(available_dates - as.Date(val_date)))]
-        val_curve_data <- cmt_clean %>% filter(as.Date(date) == closest)
-        val_date <- closest
-      }
-      
-      ct <- build_curve_tbl(val_curve_data, val_date)
-      
-      
-      total_value <- calculate_portfolio(d,ct,val_date)
-      
-      list(price = total_value)
-    }, error = function(error) {
-      shiny::showNotification(
-        paste0("Cannot calculate portolio value"),
-        type = "error"
-        )
-      return(NULL)
-    })
-    }) %>% bindEvent(input$calculate_value)
+    d <- portfolio_data()
+    req(nrow(d)>0)
+    
+    val_date <- input$portfolio_valuation_date
+    req(!is.null(val_date))
+    
+    val_curve_data <- cmt_clean %>% 
+      filter(as.Date(date) == as.Date(val_date))
+    
+    if (nrow(val_curve_data) == 0) {
+      available_dates <- sort(unique(as.Date(cmt_clean$date)))
+      closest <- available_dates[which.min(abs(available_dates - as.Date(val_date)))]
+      val_curve_data <- cmt_clean %>% filter(as.Date(date) == closest)
+      val_date <- closest
+    }
+    
+    ct <- build_curve_tbl(val_curve_data, val_date)
     
     
+    total_value <- calculate_portfolio(d,ct,val_date)
+    
+    list(price = total_value)
+    
+  })
   
   output$portfolio_value <- renderText({
     val <- portfolio_value()$price
-    req(!is.null(val))
+    
     paste0("$", formatC(val, format = "f", digits = 2, big.mark = ","))
     
   })
@@ -273,80 +258,82 @@ function(input, output, session) {
   
   port_duration <- reactive({
     
-    tryCatch({
-      
-      c <- 0.0001
-      
-      d <- portfolio_data()
-      req(nrow(d)>0)
-      
-      val_date <- input$portfolio_valuation_date
-      req(!is.null(val_date))
-      
-      val_curve_data_up <- cmt_clean %>% 
-        filter(as.Date(date) == as.Date(val_date)) %>% 
-        dplyr::mutate(rate = rate + c)
-      
-      if (nrow(val_curve_data_up) == 0) {
-        available_dates <- sort(unique(as.Date(cmt_clean$date)))
-        closest <- available_dates[which.min(abs(available_dates - as.Date(val_date)))]
-        val_curve_data <- cmt_clean %>% filter(as.Date(date) == closest)
-        val_date <- closest
-      }
-      
-      ct_up <- build_curve_tbl(val_curve_data_up, val_date)
-      
-      
-      val_curve_data_dwn <- cmt_clean %>% 
-        filter(as.Date(date) == as.Date(val_date)) %>% 
-        dplyr::mutate(rate = rate - c)
-      
-      
-      if (nrow(val_curve_data_dwn) == 0) {
-        available_dates <- sort(unique(as.Date(cmt_clean$date)))
-        closest <- available_dates[which.min(abs(available_dates - as.Date(val_date)))]
-        val_curve_data <- cmt_clean %>% filter(as.Date(date) == closest)
-        val_date <- closest
-      }
-      
-      ct_dwn <- build_curve_tbl(val_curve_data_dwn, val_date)
-      
-      
-      value_up <- calculate_portfolio(d,ct_up,val_date)
-      value_dwn <- calculate_portfolio(d,ct_dwn,val_date)
-      
-      
-      num_duration <-  (value_up - value_dwn) / (2 * c) / 10000
-      num_gamma <- 0.5 * ((value_up - 2 * portfolio_value()$price + value_dwn) / c^2) / 10000^2
-      
-      
-      list(delta = num_duration,
-           gamma = num_gamma)
-    },
-      error = function(error) {
-        shiny::showNotification(
-          paste0("Cannot calculate portolio value"),
-          type = "error"
-        )
-        return(NULL)
-      })
-    }) %>% bindEvent(input$calculate_value)
+    c <- 0.0001
+    
+    d <- portfolio_data()
+    req(nrow(d)>0)
+    
+    val_date <- input$portfolio_valuation_date
+    req(!is.null(val_date))
+    
+    val_curve_data_up <- cmt_clean %>% 
+      filter(as.Date(date) == as.Date(val_date)) %>% 
+      dplyr::mutate(rate = rate + c)
+    
+    if (nrow(val_curve_data_up) == 0) {
+      available_dates <- sort(unique(as.Date(cmt_clean$date)))
+      closest <- available_dates[which.min(abs(available_dates - as.Date(val_date)))]
+      val_curve_data <- cmt_clean %>% filter(as.Date(date) == closest)
+      val_date <- closest
+    }
+    
+    ct_up <- build_curve_tbl(val_curve_data_up, val_date)
     
     
+    val_curve_data_dwn <- cmt_clean %>% 
+      filter(as.Date(date) == as.Date(val_date)) %>% 
+      dplyr::mutate(rate = rate - c)
+    
+    
+    if (nrow(val_curve_data_dwn) == 0) {
+      available_dates <- sort(unique(as.Date(cmt_clean$date)))
+      closest <- available_dates[which.min(abs(available_dates - as.Date(val_date)))]
+      val_curve_data <- cmt_clean %>% filter(as.Date(date) == closest)
+      val_date <- closest
+    }
+    
+    ct_dwn <- build_curve_tbl(val_curve_data_dwn, val_date)
+    
+    
+    value_up <- calculate_portfolio(d,ct_up,val_date)
+    value_dwn <- calculate_portfolio(d,ct_dwn,val_date)
+    
+
+     num_duration <-  (value_up - value_dwn) / (2 * c) / portfolio_value()$price
+     num_gamma <- 0.5 * ((value_up - 2 * portfolio_value()$price + value_dwn) / c^2) / 10000^2
+     
+     DV_01_dur <- c * num_duration * portfolio_value()$price
+    
+     
+     list(delta = num_duration,
+          gamma = num_gamma,
+          DV01_dur = DV_01_dur)
+    
+    
+  })
   
   
   output$port_duration <- renderText({
     
     dur <-  port_duration()$delta
-    req(!is.null(dur))
+    
     paste0(round(dur,4)," Yrs")
     
   })
   
   output$port_convex <- renderText({
     gam <- port_duration()$gamma
-    req(!is.null(gam))
+    
     paste0(round(gam,4))
   })
+  
+  output$DV_01_delta <- renderText({
+    
+    dv1 <- port_duration()$DV01_dur
+    
+    paste0(round(dv1,4))
+    
+  }) 
+  
   
 }

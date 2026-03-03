@@ -60,13 +60,17 @@ bslib::page_navbar(
                          textOutput("portfolio_value")),
                        
                        bslib::card(
-                         card_header("Duration"),
+                         card_header("Delta"),
                          textOutput("port_duration")
                        ),
                        bslib::card(
-                         card_header("Convexity"),
+                         card_header("DV01_Gamma"),
                          textOutput("port_convex")
-                       )))),
+                         ),
+                       bslib::card(
+                         card_header("DV01_Delta"),
+                         textOutput("DV_01_delta")),
+                       ))),
   
   bslib::nav_panel(title = "Scenario Analysis",
                    
