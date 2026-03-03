@@ -9,8 +9,9 @@ bslib::page_navbar(
   title = "Risk Management",
   fillable = FALSE,
   theme = bslib::bs_theme(bootswatch = "lux"),
+  navbar_options = bslib::navbar_options(theme = "dark"),
   
-  bslib::nav_panel(title = "Market Conditions", p("Orange Section of Mental Model"),
+  bslib::nav_panel(title = "Market Conditions",
                    bslib::card(
                      bslib::card_header("Yield Curve"),
                      shiny::dateInput("yield_date","Select Day",
@@ -28,22 +29,22 @@ bslib::page_navbar(
                      DT::DTOutput("zero_curve_table")
                    )),
   
-  bslib::nav_panel(title = "Portfolio", p("Green Section of Mental Model including Risk metrics"),
+  bslib::nav_panel(title = "Portfolio",
                    bslib::card(
                      bslib::card_header("Portfolio Settings"),
                      shiny::dateInput("portfolio_valuation_date", "Portfolio Valuation Date:", value = Sys.Date(),max = Sys.Date())),
                    bslib::layout_sidebar(
                      sidebar = bslib::sidebar(
                        title = "Add Bond",
-                       shiny::uiOutput("issue_date_msg"),
                        shiny::dateInput("issue_date", "Issuance Date: "),
                        shiny::numericInput("rate_input", "Rate (%):", value = 5, min = 0, step = 0.25),
                        shiny::numericInput("maturity_input", "Maturity:", value = 10, min = 0.25, step = 0.25),
                        shiny::numericInput("quantity_input", "Quantity (#):", value = 1, min = 1, step = 1),
                        shiny::numericInput("price_input", "Face Value ($):", value = 100, min = 100, step = 100),
                        shiny::actionButton("add_bond", "Add to Portfolio"),
-                       shiny::actionButton("delete_bond", "Delete Selected Row", class = "btn-danger", icon = shiny::icon("trash-can", lib = "font-awesome"))
-                     ),
+                       shiny::actionButton("delete_bond", "Delete Selected Row", class = "btn-danger", icon = shiny::icon("trash-can", lib = "font-awesome")),
+                       shiny::actionButton("calculate_value", "Calculate Portfolio Value", class = "btn-success", icon = shiny::icon("calculator", lib = "font-awesome"))
+                       ),
                      bslib::card(
                        bslib::card_header("Current Portfolio"),
                        DT::DTOutput("portfolio_table")
