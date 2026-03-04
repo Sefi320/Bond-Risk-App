@@ -143,6 +143,7 @@ function(input, output, session) {
   
   portfolio_data <- reactiveVal(
     tibble::tibble(
+      bond_id = character(),
       Date = as.Date(character()),
       Rate = numeric(),
       Maturity = numeric(),
@@ -170,13 +171,17 @@ function(input, output, session) {
     })
     
     new_row <- tibble(
+      bond_id = NA_character_,
       Date = input$issue_date,
       Quantity = input$quantity_input,
       Maturity = input$maturity_input,
       Rate = input$rate_input,
       Price = input$price_input
     )
-    portfolio_data(dplyr::bind_rows(portfolio_data(), new_row))
+    
+    bond_label <- dplyr::bind_rows(portfolio_data(), new_row)
+    bond_label$bond_id <- paste0("Bond ", 1:nrow(bond_label))
+    portfolio_data(bond_label)
   })
   
   output$issue_date_msg <- renderUI({
@@ -195,7 +200,12 @@ function(input, output, session) {
   # deletes a row
   observeEvent(input$delete_bond, {
     req(input$portfolio_table_rows_selected)
-    portfolio_data(portfolio_data()[-input$portfolio_table_rows_selected, ])
+    bond_label <- portfolio_data()[-input$portfolio_table_rows_selected, ]
+    
+    if(nrow(bond_label) > 0) {
+      bond_label$bond_id <- paste0("Bond ", 1:nrow(bond_label))
+    }
+    portfolio_data(bond_label)
   })
   
   # edits a row
@@ -356,22 +366,22 @@ function(input, output, session) {
     
     for (bond in 1:nrow(d)) {
       
-      value_up <- calculate_portfolio(d[bond],ct_up,val_date)
-      value_dwn <- calculate_portfolio(d[bond],ct_dwn,val_date)
+      value_up <- calculate_portfolio(d[bond,],ct_up,val_date)
+      value_dwn <- calculate_portfolio(d[bond,],ct_dwn,val_date)
       
       dv01_bond <- (value_up - value_dwn) / (2 * c) / 10000
       
       dv01 <- dplyr::bind_rows(
         dv01,
         tibble::tibble(
-          bond_id = bond,
+          bond_id = d$bond_id[bond],
           DV01 = dv01_bond))
       
     }
     
-    total_dv01 <- sum(abs(dv01_tbl$DV01))
+    total_dv01 <- sum(abs(dv01$DV01))
     
-    dv01_tbl %>%
+    dv01 %>%
       dplyr::mutate(
         DV01_pct = abs(DV01) / total_dv01)
   }, error = function(error) {
