@@ -7,6 +7,82 @@ library(DT)
 # Define server logic required to draw a histogram
 function(input, output, session) {
   
+  # Historical Charts
+  chart_duration <- reactive({
+    plotly::plot_ly(
+      data = chart_data,
+      x = ~date,
+      y = ~duration,
+      color = ~symbol,
+      type = "scatter",
+      mode = "lines"
+    ) %>% 
+      plotly::layout(
+        xaxis = list(title = "Date"),
+        yaxis = list(title = "Duration")
+      )
+  })
+  
+  chart_convexity <- reactive({
+    plotly::plot_ly(
+      data = chart_data,
+      x = ~date,
+      y = ~convexity,
+      color = ~symbol,
+      type = "scatter",
+      mode = "lines"
+    ) %>% 
+      plotly::layout(
+        xaxis = list(title = "Date"),
+        yaxis = list(title = "Convexity")
+      )
+  })
+  
+  chart_delta <- reactive({
+    plotly::plot_ly(
+      data = chart_data,
+      x = ~date,
+      y = ~delta,
+      color = ~symbol,
+      type = "scatter",
+      mode = "lines"
+    ) %>% 
+      plotly::layout(
+        xaxis = list(title = "Date"),
+        yaxis = list(title = "Delta")
+      )
+  })
+  
+  chart_volatility <- reactive({
+    plotly::plot_ly(
+      data = volatility_data,
+      x = ~date,
+      y = ~sd30,
+      color = ~symbol,
+      type = "scatter",
+      mode = "lines"
+    ) %>% 
+      plotly::layout(
+        xaxis = list(title = "Date"),
+        yaxis = list(title = "30-Day Rolling Volatility (Annualized bps)")
+      )
+  })
+  
+  # Select the graph the user wants
+  chart_choice_input <- reactive({
+    switch(input$chart_choice,
+           "duration_chart" = chart_duration(),
+           "convexity_chart" = chart_convexity(),
+           "delta_chart" = chart_delta(),
+           "volatility_chart" = chart_volatility()
+    )
+  })
+  
+  # Output to UI
+  output$historical_chart <- plotly::renderPlotly({
+    chart_choice_input()
+  })
+  
   x <- reactive({
     req(input$yield_date)
     

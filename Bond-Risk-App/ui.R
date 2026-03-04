@@ -11,6 +11,19 @@ bslib::page_navbar(
   theme = bslib::bs_theme(bootswatch = "lux"),
   navbar_options = bslib::navbar_options(theme = "dark"),
   
+  bslib::nav_panel(title = "Historical Analysis",
+                   bslib::card(
+                     bslib::card_header("Historical FRED Treasury Bonds"),
+                     shiny::selectInput("chart_choice", "Select Chart to Display:",
+                                        choices = c(
+                                          "Duration" = "duration_chart",
+                                          "Convexity" = "convexity_chart",
+                                          "Delta" = "delta_chart",
+                                          "Volatility" = "volatility_chart"),
+                                        selected = "duration_chart"),
+                     plotly::plotlyOutput("historical_chart")
+                   )),
+  
   bslib::nav_panel(title = "Market Conditions",
                    bslib::card(
                      bslib::card_header("Yield Curve"),

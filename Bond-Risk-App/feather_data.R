@@ -21,9 +21,7 @@ from <- "1992-01-01"
 cmt_data <- tidyquant::tq_get(
   tickers,
   get = "economic.data",
-  from = from) %>% 
-  tidyr::fill(price,.direction = "down")
-
+  from = from)
 
 cmt_clean <- cmt_data %>% 
   dplyr::mutate(

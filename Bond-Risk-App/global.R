@@ -2,6 +2,7 @@ library(tidyquant)
 library(tidyverse)
 library(RQuantLib)
 library(arrow)
+library(slider)
 library(Rcpp)
 Rcpp::sourceCpp("bondcalculator.cpp")
 
@@ -35,7 +36,7 @@ risk_result <- cmt_clean %>%
   bond_risk() %>% 
   as.data.frame()
 
-cmt_clean2 <- cmt_clean %>% 
+cmt_clean <- cmt_clean %>% 
   dplyr::mutate(
     duration = risk_result$duration,
     convexity = risk_result$convexity,
@@ -54,6 +55,33 @@ order <- c("DGS1MO", # 1-Month
            "DGS20",  # 20-Year
            "DGS30"   # 30-Year
 )
+
+chart_tickers <- c(
+  "DGS1",   # 1-Year
+  "DGS2",   # 2-Year
+  "DGS5",   # 5-Year
+  "DGS7",   # 7-Year
+  "DGS10",  # 10-Year
+  "DGS20",  # 20-Year
+  "DGS30"   # 30-Year
+)
+
+chart_data <- cmt_clean %>% 
+  dplyr::filter(symbol %in% chart_tickers) %>%
+  dplyr::mutate(symbol = factor(symbol, levels = chart_tickers))
+
+volatility_data <- chart_data %>% 
+  dplyr::group_by(symbol) %>% 
+  dplyr::mutate(
+    sd30 = slider::slide_dbl(
+      .x = change_bps,
+      .f = sd,
+      .before = 30,
+      .after = 0,
+      .complete = TRUE
+    ) * sqrt(252)
+  ) %>%
+  dplyr::ungroup()
 
 # helper function to get the actual values from the ticker names since "DiscountCurve" only reads the numbers
 q <- function(df_day, sym){
