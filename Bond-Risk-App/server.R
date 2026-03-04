@@ -219,7 +219,7 @@ function(input, output, session) {
   
   portfolio_data <- reactiveVal(
     tibble::tibble(
-      bond_id = character(),
+      bond = character(),
       Date = as.Date(character()),
       Rate = numeric(),
       Maturity = numeric(),
@@ -511,6 +511,89 @@ function(input, output, session) {
     
   })
   
+  # Scenario analysis section
+  
+  parallel_shift_data <- reactive({
+    req(input$calculate_value)
+    
+    p_value <- portfolio_value()$price
+    req(!is.null(p_value))
+    
+    p_duration <- port_duration()
+    req(!is.null(p_duration))
+    
+    dollar_dv01 <- p_duration$DV01_dur
+    dollar_gamma <- p_duration$gamma
+    
+    shift_range <- seq(-100,100, by = 10)
+    
+    tibble::tibble(
+      shift_bps = shift_range,
+      linear_estimate = p_value + (dollar_dv01 * shift_bps),
+      convexity_estimate = p_value + (dollar_dv01 * shift_bps) + (dollar_gamma * (shift_bps^2))
+    )
+  })
+  
+  # plotly for parallel shift
+  
+  
+  output$parallel_shift_plot <- plotly::renderPlotly({
+    req(input$calculate_value)
+    df <- parallel_shift_data()
+    req(!is.null(df))
+    
+    plotly::plot_ly(
+      data = df,
+      x = ~shift_bps) %>% 
+      plotly::add_lines(
+        y = ~linear_estimate, 
+        name = "Linear Estimate (DV01)",
+        line = list(dash = "dash", color = "red")) %>% 
+      
+      plotly::add_lines(
+        y = ~convexity_estimate, 
+        name = "Convexity Adjusted Estimate (DV01)",
+        line = list(color = "blue")) %>%
+      
+      plotly::layout(
+        title = "Parallel Shift Adjusted Portfolio Value",
+        xaxis = list(title = "Yield Shift (bps)"),
+        yaxis = list(title = "Estimated Portfolio Value ($)", tickformat = "$,.2f"),
+        hovermode = "x unified")
+  })
+    
+  # dt for parallel shift
+  
+  output$parallel_shift_dt <- DT::renderDataTable({
+    req(input$calculate_value)
+    df <- parallel_shift_data()
+    req(!is.null(df))
+    
+    df_names <- df %>% 
+      dplyr::rename(
+        "Shift (bps)" = shift_bps,
+        "Linear Estimate (DV01)" = linear_estimate,
+        "Convexity Adjusted Estimate (DV01)" = convexity_estimate
+      )
+    
+    DT::datatable(
+      df_names,
+      rownames = FALSE,
+      options = list(
+        searching = FALSE,
+        lengthchange = FALSE,
+        paging = FALSE,
+        info = FALSE)
+      ) %>% 
+      
+    DT::formatCurrency(
+      columns = c("Linear Estimate (DV01)", "Convexity Adjusted Estimate (DV01)"),
+      currency = "$",
+      digits = 2
+    )
+    
+  })
+    
   
   
 }
