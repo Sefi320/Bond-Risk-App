@@ -151,7 +151,7 @@ This application is intended for educational purposes only, it is not meant to b
 
 Potential improvements include
 
--   key rate duration\
--   yield curve non-parallel shocks\
+-   key rate duration
+-   yield curve non-parallel shocks
 
 ------------------------------------------------------------------------
