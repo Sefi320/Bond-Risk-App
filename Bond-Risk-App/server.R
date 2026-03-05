@@ -443,7 +443,7 @@ function(input, output, session) {
         DV01_pct = abs(DV01) / total_dv01)
   }, error = function(error) {
     shiny::showNotification(
-      paste0("Cannot calculate portolio value"),
+      paste0("Cannot calculate portfolio value"),
       type = "error"
     )
     return(NULL)
