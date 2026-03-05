@@ -125,14 +125,14 @@ http://localhost:3838
 
 3.  Explore the term structure of a date of your choosing and see the zero curve being built in real-time by log-linear inerpolation of the discount factors
 
-4.  Enter bonds into the portfolio input table\
+4.  Enter bonds into the portfolio input table
 
 5.  Select the portfolio valuation date (If the app returns an error, select a different valuation date because it may just mean that there is no yield data for the selected day)
 
 The application automatically:
 
--   builds the zero curve\
--   prices the portfolio by discounting the cash flows of each bond and aggregating the PV of all of the CFs\
+-   builds the zero curve
+-   prices the portfolio by discounting the cash flows of each bond and aggregating the PV of all of the CFs
 -   computes duration, DV01, and gamma
 
 Review the **DV01 contribution chart** to identify risk concentrations.
