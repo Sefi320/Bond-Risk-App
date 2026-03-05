@@ -16,25 +16,25 @@ The application provides the following functionality.
 
 ## Portfolio Pricing
 
--   Bond cash flow generation\
--   Discounting using a zero-rate curve\
+-   Bond cash flow generation
+-   Discounting using a zero-rate curve
 -   Portfolio valuation
 
 ## Interest Rate Risk Analytics
 
--   Delta (numerical using the Central Difference Method)\
--   DV01 (Dollar Value of a change in interest rates by 1bp)\
+-   Delta (numerical using the Central Difference Method)
+-   DV01 (Dollar Value of a change in interest rates by 1bp)
 -   Dollar gamma (numerical using the Central Difference Method)
 
 ## Risk Decomposition
 
--   Portfolio DV01 contribution analysis\
+-   Portfolio DV01 contribution analysis
 -   Interactive visualization of risk concentrations
 
 ## Visualization
 
--   Interactive charts built with `plotly`\
--   Yield curve visualization\
+-   Interactive charts built with `plotly`
+-   Yield curve visualization
 -   Yield curve risk metrics visualization
 
 ------------------------------------------------------------------------
