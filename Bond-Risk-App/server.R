@@ -228,7 +228,7 @@ function(input, output, session) {
     })
     
     new_row <- tibble(
-      bond_id = NA_character_,
+      bond = NA_character_,
       Date = input$issue_date,
       Quantity = input$quantity_input,
       Maturity = input$maturity_input,
@@ -237,7 +237,7 @@ function(input, output, session) {
     )
     
     bond_label <- dplyr::bind_rows(portfolio_data(), new_row)
-    bond_label$bond_id <- paste0("Bond ", 1:nrow(bond_label))
+    bond_label$bond <- paste0("Bond ", 1:nrow(bond_label))
     portfolio_data(bond_label)
   })
   
@@ -260,7 +260,7 @@ function(input, output, session) {
     bond_label <- portfolio_data()[-input$portfolio_table_rows_selected, ]
     
     if(nrow(bond_label) > 0) {
-      bond_label$bond_id <- paste0("Bond ", 1:nrow(bond_label))
+      bond_label$bond <- paste0("Bond ", 1:nrow(bond_label))
     }
     portfolio_data(bond_label)
   })
@@ -431,7 +431,7 @@ function(input, output, session) {
       dv01 <- dplyr::bind_rows(
         dv01,
         tibble::tibble(
-          bond_id = d$bond_id[bond],
+          bond_id = d$bond[bond],
           DV01 = dv01_bond))
       
     }
@@ -506,7 +506,7 @@ function(input, output, session) {
     dollar_dv01 <- p_duration$DV01_dur
     dollar_gamma <- p_duration$gamma
     
-    shift_range <- seq(-300,300, by = 10)
+    shift_range <- seq(-200,200, by = 25)
     
     tibble::tibble(
       shift_bps = shift_range,
@@ -560,10 +560,12 @@ function(input, output, session) {
     DT::datatable(
       df_names,
       rownames = FALSE,
+      selection = "single",
       options = list(
         searching = FALSE,
-        lengthchange = FALSE,
-        paging = FALSE,
+        lengthChange = FALSE,
+        paging = TRUE,
+        pageLength = 5,
         info = FALSE)
       ) %>% 
       
