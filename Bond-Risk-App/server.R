@@ -164,16 +164,8 @@ function(input, output, session) {
     dplyr::select(-date) %>%
     stats::cor()
   
-  output$cor_map <- renderPlot({
-    corrplot::corrplot(cor,
-                       type = "lower",
-                       tl.col = "black",
-                       tl.srt = 45,
-                       method = "shade")
-    
-  })
   
- 
+
   
   # Zero rate
   curve_tbl <- reactive({
@@ -199,18 +191,7 @@ function(input, output, session) {
       )
   })
   
-  # Table output to see different maturities, DFs and Zero Rates
-  output$zero_curve_table <- DT::renderDataTable({
-    ct <- curve_tbl()
-    
-    DT::datatable(
-      ct %>% transmute(
-        maturity,
-        zero_rate_pct = round(zero_rate, 4),
-        discount_factor = round(discount_factor, 6)
-      )
-    )
-  })
+
   
   # -----
   # green portfolio section
@@ -525,7 +506,7 @@ function(input, output, session) {
     dollar_dv01 <- p_duration$DV01_dur
     dollar_gamma <- p_duration$gamma
     
-    shift_range <- seq(-100,100, by = 10)
+    shift_range <- seq(-300,300, by = 10)
     
     tibble::tibble(
       shift_bps = shift_range,

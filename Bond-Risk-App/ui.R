@@ -33,23 +33,18 @@ bslib::page_navbar(
                      plotly::plotlyOutput("yield_curve")
                    ),
                    bslib::card(
-                     bslib::card_header("Correlation Matrix"),
-                     shiny::plotOutput("cor_map")
-                   ),
-                   bslib::card(
                      bslib::card_header("Zero Curve (from DiscountCurve)"),
-                     plotly::plotlyOutput("zero_curve_plot"),
-                     DT::DTOutput("zero_curve_table")
+                     plotly::plotlyOutput("zero_curve_plot")
                    )),
   
   bslib::nav_panel(title = "Portfolio",
                    bslib::card(
                      bslib::card_header("Portfolio Settings"),
-                     shiny::dateInput("portfolio_valuation_date", "Portfolio Valuation Date:", value = Sys.Date(),max = Sys.Date())),
+                     shiny::dateInput("portfolio_valuation_date", "Portfolio Valuation Date:", value = default_date,max = Sys.Date())),
                    bslib::layout_sidebar(
                      sidebar = bslib::sidebar(
                        title = "Add Bond",
-                       shiny::dateInput("issue_date", "Issuance Date: "),
+                       shiny::dateInput("issue_date", "Issuance Date: ", value = default_date),
                        shiny::numericInput("rate_input", "Rate (%):", value = 5, min = 0, step = 0.25),
                        shiny::numericInput("maturity_input", "Maturity:", value = 10, min = 0.25, step = 0.25),
                        shiny::numericInput("quantity_input", "Quantity (#):", value = 1, min = 1, step = 1),
